@@ -1,0 +1,11 @@
+{
+    "watch": [
+        "backend"
+    ],
+    "ignore": [
+        "auth",
+        "frontend",
+        "frontend/dist"
+    ],
+    "ext": "js,json"
+}
