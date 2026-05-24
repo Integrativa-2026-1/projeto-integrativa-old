@@ -7,9 +7,9 @@ const {
 const pino = require("pino");
 const path = require("path");
 const fs = require("fs");
+const { askGemini } = require("./gemini");
 
 const AUTH_DIR = path.join(__dirname, "../auth");
-const REPLY_TEXT = "Olá! Estou em desenvolvimento";
 
 let latestQR = null;
 
@@ -59,7 +59,14 @@ async function startWhatsApp() {
       if (!from || from.endsWith("@broadcast")) continue;
 
       try {
-        await sock.sendMessage(from, { text: REPLY_TEXT });
+        const text = msg.message?.conversation?.trim() ||
+                     msg.message?.extendedTextMessage?.text?.trim();
+
+        const reply = await askGemini(text);
+
+        if (reply) {
+          await sock.sendMessage(from, { text: reply });
+        }
       } catch (err) {
         console.error("Erro ao responder mensagem:", err.message);
       }
