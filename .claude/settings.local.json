@@ -3,7 +3,9 @@
     "allow": [
       "Bash(Get-ChildItem *)",
       "Bash(xargs grep -l \"createBufferedFunction\")",
-      "Bash(xargs grep -l \"makeWASocket\")"
+      "Bash(xargs grep -l \"makeWASocket\")",
+      "Read(//mnt/c/Users/dispo/OneDrive/Documentos/Estevão/Projetos Pessoais/**)",
+      "Bash(npm list *)"
     ]
   }
 }
