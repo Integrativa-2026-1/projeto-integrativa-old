@@ -51,14 +51,6 @@ app.get("/qr", async (_, res) => {
   `);
 });
 
-const frontendPath = path.join(__dirname, "../frontend/dist");
-
-app.use(express.static(frontendPath));
-
-app.use((_, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
-});
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
