@@ -1,7 +1,7 @@
 const { google } = require("googleapis");
-const { upsertTokens } = require("./db");
+const { salvarTokensGoogle } = require("./banco");
 
-const SCOPES = [
+const ESCOPOS = [
   "openid",
   "email",
   "profile",
@@ -10,7 +10,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/classroom.coursework.me",
 ];
 
-function createOAuthClient() {
+function criarClienteOAuth() {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -18,22 +18,23 @@ function createOAuthClient() {
   );
 }
 
-function getAuthUrl(sessionId) {
-  return createOAuthClient().generateAuthUrl({
+function obterUrlAutenticacao(sessionId) {
+  return criarClienteOAuth().generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
-    scope: SCOPES,
+    scope: ESCOPOS,
     state: sessionId,
   });
 }
 
-async function handleOAuthCallback(code, jid) {
-  const { tokens } = await createOAuthClient().getToken(code);
-  await upsertTokens(jid, tokens.access_token, tokens.refresh_token);
+async function tratarRetornoOAuth(code, jid) {
+  const { tokens } = await criarClienteOAuth().getToken(code);
+  // Salva no banco de dados com a nossa nova função em português
+  await salvarTokensGoogle(jid, tokens.access_token, tokens.refresh_token);
 }
 
-async function getCourses(accessToken, refreshToken) {
-  const auth = createOAuthClient();
+async function obterCursos(accessToken, refreshToken) {
+  const auth = criarClienteOAuth();
   auth.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
 
   const { data } = await google
@@ -43,9 +44,20 @@ async function getCourses(accessToken, refreshToken) {
   return data.courses || [];
 }
 
-function formatCourseList(courses) {
-  if (!courses.length) return "No active courses found in Google Classroom.";
-  return "Your classes:\n\n" + courses.map((c, i) => `${i + 1}. ${c.name}`).join("\n");
+function formatarListaCursos(courses) {
+  if (!courses.length) {
+    return "Nenhuma disciplina ativa encontrada no Google Classroom.";
+  }
+  return (
+    "Suas turmas sincronizadas:\n\n" +
+    courses.map((c, i) => `${i + 1}️⃣ ${c.name}`).join("\n")
+  );
 }
 
-module.exports = { getAuthUrl, handleOAuthCallback, getCourses, formatCourseList };
+module.exports = {
+  criarClienteOAuth,
+  obterUrlAutenticacao,
+  tratarRetornoOAuth,
+  obterCursos,
+  formatarListaCursos,
+};
